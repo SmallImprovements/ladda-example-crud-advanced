@@ -57,14 +57,12 @@ function Contact({ contact, inEditMode, onEnterEditMode, onLeaveEditMode }) {
     const onRemove = () => api.contacts.deleteContact(contact.id).then(() => onLeaveEditMode());
 
     return (
-      <Card className={ styles.contact }>
-        <ContactEditForm
-          contact={ contact }
-          onSave={ onSave }
-          onRemove={ onRemove }
-          onCancel={ onLeaveEditMode }
-        />
-      </Card>
+      <ContactEditForm
+        contact={ contact }
+        onSave={ onSave }
+        onRemove={ onRemove }
+        onCancel={ onLeaveEditMode }
+      />
     );
   }
 
