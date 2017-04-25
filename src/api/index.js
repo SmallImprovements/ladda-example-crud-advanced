@@ -1,4 +1,6 @@
 import { build } from 'ladda-cache';
+import { logger } from 'ladda-logger';
+import { observable } from 'ladda-observable';
 import * as contacts from './contacts';
 import * as activities from './activities';
 
@@ -12,4 +14,7 @@ const config = {
   }
 };
 
-export default build(config);
+export default build(config, [
+  logger(),
+  observable()
+]);
