@@ -10,6 +10,7 @@ import api from 'api';
 import styles from './styles.scss';
 
 function ContactList({ contacts }) {
+  console.log(contacts);
   return (
     <div>
       { map(contacts, (contact) => (
@@ -34,7 +35,7 @@ function Contact({ contact }) {
 }
 
 export default flow(withData({
-  resolve: {
-    contacts: ({ ownerId }) => api.contacts.getContacts(ownerId)
+  observe: {
+    contacts: ({ ownerId }) => api.contacts.getContacts.createObservable(ownerId)
   }
 }), withOwnerId)(ContactList);

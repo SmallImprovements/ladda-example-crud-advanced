@@ -40,7 +40,7 @@ function Activity({ avatar, text }) {
 }
 
 export default flow(withData({
-  resolve: {
-    activities: ({ ownerId }) => api.activities.getActivities(ownerId)
+  observe: {
+    activities: ({ ownerId }) => api.activities.getActivities.createObservable(ownerId)
   }
 }), withOwnerId)(ActivityList);
