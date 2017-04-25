@@ -38,6 +38,8 @@
     "classnames": "^2.2.5",
     "es6-promise-promise": "^1.0.0",
     "ladda-cache": "^0.2.1",
+    "ladda-logger": "^0.2.1",
+    "ladda-observable": "^0.2.1",
     "ladda-react": "^0.0.3",
     "lodash": "^4.17.2",
     "react": "^15.3.2",
