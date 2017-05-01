@@ -3,7 +3,7 @@ import axios from 'axios';
 
 import { ROOT } from 'constants/paths';
 
-const KEY = 'ladda-example-crud-owner-id-v1';
+const KEY = 'ladda-example-crud--advanced-owner-id-v1';
 
 function getStorage() {
   return window.localStorage; // eslint-disable-line no-undef
@@ -12,7 +12,7 @@ function getStorage() {
 export function getId() {
   const storage = getStorage();
   if (!storage) {
-      return null;
+    return null;
   }
   return storage.getItem(KEY);
 }
@@ -26,7 +26,7 @@ function createId() {
   const storage = getStorage();
   const id = shortid.generate();
   if (storage) {
-      storage.setItem(KEY, id);
+    storage.setItem(KEY, id);
   }
   return id;
 }
