@@ -43057,17 +43057,27 @@ var _laddaFp = __webpack_require__(1);
 
 var _helper = __webpack_require__(0);
 
+var isNoOperation = function isNoOperation(change) {
+  return change.operation === 'NO_OPERATION';
+};
 var isChangeOfSameEntity = function isChangeOfSameEntity(entity, change) {
-  return entity.name === change.entity;
+  return !isNoOperation(change) && entity.name === change.entity;
 };
 var isChangeOfView = function isChangeOfView(rel, change) {
-  return rel.views.indexOf(change.entity) !== -1;
+  return !isNoOperation(change) && rel.views.indexOf(change.entity) !== -1;
 };
 var isChangeOfParent = function isChangeOfParent(rel, change) {
-  return rel.parents.indexOf(change.entity) !== -1;
+  return !isNoOperation(change) && rel.parents.indexOf(change.entity) !== -1;
 };
 var isInvalidatedByChange = function isInvalidatedByChange(rel, change) {
   return rel.invalidatedBy.indexOf(change.entity) !== -1;
+};
+var isInvalidatedByFunction = function isInvalidatedByFunction(entity, fn, change) {
+  if (change.entity !== entity.name) {
+    return false;
+  }
+  var invalidations = entity.api[change.apiFn].invalidates;
+  return invalidations.length && invalidations.indexOf(fn.name) !== -1;
 };
 
 var isRelevantChange = function isRelevantChange(relationships, entity, fn, change) {
@@ -43089,7 +43099,7 @@ var isRelevantChange = function isRelevantChange(relationships, entity, fn, chan
   // re-trigger here.
   //
   var rel = relationships[entity.name];
-  return isChangeOfSameEntity(entity, change) || isChangeOfView(rel, change) || isChangeOfParent(rel, change) || isInvalidatedByChange(rel, change);
+  return isChangeOfSameEntity(entity, change) || isChangeOfView(rel, change) || isChangeOfParent(rel, change) || isInvalidatedByChange(rel, change) || isInvalidatedByFunction(entity, fn, change);
 };
 
 var createObservableFactory = function createObservableFactory(state, relationships, entityConfigs, entity, fn) {
