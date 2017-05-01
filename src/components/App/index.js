@@ -4,7 +4,7 @@ import { createHistory } from 'history';
 import routes from './routes';
 
 const browserHistory = useRouterHistory(createHistory)({
-  basename: PRODUCTION ? '/ladda-example-crud' : '/'
+  basename: PRODUCTION ? '/ladda-example-crud-advanced' : '/'
 });
 
 export default function App() {

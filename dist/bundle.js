@@ -53113,7 +53113,7 @@ var _routes2 = _interopRequireDefault(_routes);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var browserHistory = (0, _reactRouter.useRouterHistory)(_history.createHistory)({
-  basename:  true ? '/ladda-example-crud' : '/'
+  basename:  true ? '/ladda-example-crud-advanced' : '/'
 });
 
 function App() {
