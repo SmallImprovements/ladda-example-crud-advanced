@@ -41350,13 +41350,6 @@ var KNOWN_STATICS = {
   arity: true
 };
 
-var setFnName = (0, _laddaFp.curry)(function (name, fn) {
-  Object.defineProperty(fn, 'name', { writable: true });
-  fn.name = name;
-  Object.defineProperty(fn, 'name', { writable: false });
-  return fn;
-});
-
 var hoistMetaData = function hoistMetaData(a, b) {
   var keys = Object.getOwnPropertyNames(a);
   for (var i = keys.length - 1; i >= 0; i--) {
@@ -41365,7 +41358,6 @@ var hoistMetaData = function hoistMetaData(a, b) {
       b[k] = a[k];
     }
   }
-  setFnName(a.name, b);
   return b;
 };
 
@@ -41383,9 +41375,7 @@ var mapApiFunctions = exports.mapApiFunctions = function mapApiFunctions(fn, ent
             apiFn = _ref4[1];
 
         var getFn = (0, _laddaFp.compose)((0, _laddaFp.prop)(apiFnName), (0, _laddaFp.prop)('api'));
-        var nextFn = hoistMetaData(getFn(entity), fn({ entity: entity, fn: apiFn }));
-        setFnName(apiFnName, nextFn);
-        apiM[apiFnName] = nextFn;
+        apiM[apiFnName] = hoistMetaData(getFn(entity), fn({ entity: entity, fn: apiFn }));
         return apiM;
       }, {}, (0, _laddaFp.toPairs)(entity.api))
     });
@@ -41431,8 +41421,19 @@ var setApiConfigDefaults = function setApiConfigDefaults(ec) {
     return copy;
   };
 
+  var setFnName = function setFnName(_ref7) {
+    var _ref8 = _slicedToArray(_ref7, 2),
+        name = _ref8[0],
+        apiFn = _ref8[1];
+
+    apiFn.fnName = apiFn.fnName || name;
+    return [name, apiFn];
+  };
+
+  var mapApi = (0, _laddaFp.compose)(_laddaFp.fromPairs, (0, _laddaFp.map)(setFnName), _laddaFp.toPairs, (0, _laddaFp.mapValues)(setDefaults));
+
   return _extends({}, ec, {
-    api: ec.api ? (0, _laddaFp.mapValues)(setDefaults, ec.api) : ec.api
+    api: ec.api ? mapApi(ec.api) : ec.api
   });
 };
 
@@ -41560,16 +41561,19 @@ var HANDLERS = {
   NO_OPERATION: _noOperation.decorateNoOperation
 };
 
-var normalizeFnName = function normalizeFnName(fnName) {
-  return fnName.replace(/^bound /, '');
+var normalizePayload = function normalizePayload(payload) {
+  if (payload === null) {
+    return payload;
+  }
+  return Array.isArray(payload) ? payload : [payload];
 };
 
 var notify = (0, _laddaFp.curry)(function (onChange, entity, fn, args, payload) {
   onChange({
     operation: fn.operation,
     entity: entity.name,
-    apiFn: normalizeFnName(fn.name),
-    values: Array.isArray(payload) ? payload : [payload],
+    apiFn: fn.fnName,
+    values: normalizePayload(payload),
     args: args
   });
 });
@@ -41726,8 +41730,14 @@ var _cache = __webpack_require__(1);
 
 function decorateNoOperation(c, cache, notify, e, aFn) {
   return function () {
-    return aFn.apply(undefined, arguments).then((0, _laddaFp.passThrough)(function () {
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return aFn.apply(undefined, args).then((0, _laddaFp.passThrough)(function () {
       return (0, _cache.invalidateQuery)(cache, e, aFn);
+    })).then((0, _laddaFp.passThrough)(function () {
+      return notify(args, null);
     }));
   };
 }
@@ -41953,7 +41963,7 @@ var getFromCache = function getFromCache(qc, e, k) {
 
 // QueryCache -> Entity -> ApiFunction -> [a] -> [b] -> [b]
 var put = exports.put = (0, _laddaFp.curry)(function (qc, e, aFn, args, xs) {
-  var k = createKey(e, [aFn.name].concat(_toConsumableArray((0, _laddaFp.filter)(_laddaFp.identity, args))));
+  var k = createKey(e, [aFn.fnName].concat(_toConsumableArray((0, _laddaFp.filter)(_laddaFp.identity, args))));
   if (Array.isArray(xs)) {
     qc.cache[k] = toCacheValue((0, _laddaFp.map)((0, _laddaFp.prop)('__ladda__id'), xs));
   } else {
@@ -41970,13 +41980,13 @@ var getValue = exports.getValue = function getValue(v) {
 
 // QueryCache -> Entity -> ApiFunction -> [a] -> Bool
 var contains = exports.contains = function contains(qc, e, aFn, args) {
-  var k = createKey(e, [aFn.name].concat(_toConsumableArray((0, _laddaFp.filter)(_laddaFp.identity, args))));
+  var k = createKey(e, [aFn.fnName].concat(_toConsumableArray((0, _laddaFp.filter)(_laddaFp.identity, args))));
   return inCache(qc, k);
 };
 
 // QueryCache -> Entity -> ApiFunction -> [a] -> Bool
 var get = exports.get = function get(qc, e, aFn, args) {
-  var k = createKey(e, [aFn.name].concat(_toConsumableArray((0, _laddaFp.filter)(_laddaFp.identity, args))));
+  var k = createKey(e, [aFn.fnName].concat(_toConsumableArray((0, _laddaFp.filter)(_laddaFp.identity, args))));
   if (!inCache(qc, k)) {
     throw new Error('Tried to access ' + e.name + ' with key ' + k + ' which doesn\'t exist.\n      Do a contains check first!');
   }
@@ -42376,7 +42386,7 @@ var defaultColors = {
 };
 
 var toFnName = function toFnName(entity, fn) {
-  return entity.name + '.' + fn.name;
+  return entity.name + '.' + fn.fnName;
 };
 
 /* eslint-disable no-undef */
@@ -43077,7 +43087,7 @@ var isInvalidatedByFunction = function isInvalidatedByFunction(entity, fn, chang
     return false;
   }
   var invalidations = entity.api[change.apiFn].invalidates;
-  return invalidations.length && invalidations.indexOf(fn.name) !== -1;
+  return invalidations.length && invalidations.indexOf(fn.fnName) !== -1;
 };
 
 var isRelevantChange = function isRelevantChange(relationships, entity, fn, change) {
