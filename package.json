@@ -40,7 +40,7 @@
     "ladda-cache": "^0.2.7",
     "ladda-logger": "^0.2.7",
     "ladda-observable": "^0.2.7",
-    "ladda-react": "^0.0.3",
+    "ladda-react": "^0.2.7",
     "lodash": "^4.17.2",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
